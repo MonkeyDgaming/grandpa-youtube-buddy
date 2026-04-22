@@ -1,1 +1,419 @@
-
+/* =============================================================
+   GRANDPA YOUTUBE BUDDY — style.css
+   Design goals: dark bg, high contrast, huge touch targets,
+   minimum 24px font sizes, portrait-phone optimized.
+   ============================================================= */
+ 
+/* ── Custom Properties ──────────────────────────────────────── */
+:root {
+  --bg:           #0d0d0d;
+  --accent:       #ffcc00;
+  --text:         #ffffff;
+  --text-muted:   #aaaaaa;
+  --card-bg:      #1a1a1a;
+  --card-border:  #2a2a2a;
+  --overlay-bg:   #000000;
+  --error-bg:     #cc2200;
+  --radius-lg:    16px;
+  --radius-sm:    8px;
+  --gap:          12px;
+  --font-base:    24px;
+  --font-large:   36px;
+  --font-xlarge:  48px;
+  --touch-min:    60px;
+  --transition:   0.2s ease;
+  /* iOS safe areas for notch / Dynamic Island / home indicator */
+  --safe-top:     env(safe-area-inset-top, 0px);
+  --safe-bottom:  env(safe-area-inset-bottom, 0px);
+}
+ 
+/* ── Reset & Base ────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+ 
+html, body {
+  height: 100%;
+  overflow: hidden;           /* prevent scroll behind overlays */
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-size: var(--font-base);
+  /* Remove grey flash on tap (iOS) */
+  -webkit-tap-highlight-color: transparent;
+  /* Kill the 300ms double-tap delay globally without needing FastClick */
+  touch-action: manipulation;
+}
+ 
+/* Ensure the HTML hidden attribute always wins regardless of display rules */
+[hidden] {
+  display: none !important;
+}
+ 
+/* ── Screen Layer System ─────────────────────────────────────── */
+/*
+ * Screens are always in the DOM but invisible by default.
+ * Fading via opacity + pointer-events avoids layout thrash from
+ * toggling display, and makes transitions smooth.
+ */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;  /* momentum scrolling on iOS */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+ 
+.screen.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+ 
+/* ── Home Screen ─────────────────────────────────────────────── */
+.home-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 24px;
+}
+ 
+.app-title {
+  font-size: var(--font-xlarge);
+  font-weight: 900;
+  color: var(--accent);
+  text-align: center;
+  letter-spacing: -1px;
+}
+ 
+/* The single most important tap target in the app */
+.btn-mic {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: var(--accent);
+  color: #000000;
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 28px 40px;
+  min-height: 140px;
+  min-width: 280px;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: var(--font-large);
+  box-shadow: 0 6px 24px rgba(255, 204, 0, 0.35);
+  transition: transform var(--transition), box-shadow var(--transition),
+              background var(--transition), color var(--transition);
+  -webkit-user-select: none;
+  user-select: none;
+}
+ 
+.btn-mic:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 8px rgba(255, 204, 0, 0.2);
+}
+ 
+.mic-icon {
+  font-size: 56px;
+  line-height: 1;
+}
+ 
+.btn-label {
+  font-size: var(--font-large);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+}
+ 
+/* ── Listening State ─────────────────────────────────────────── */
+/*
+ * When JS adds class 'listening' to the button, it turns red
+ * and pulses — giving a clear "recording" signal familiar from
+ * phone call / voice memo apps.
+ */
+@keyframes pulse-ring {
+  0%   { transform: scale(1);    opacity: 0.9; }
+  60%  { transform: scale(1.08); opacity: 0.7; }
+  100% { transform: scale(1);    opacity: 0.9; }
+}
+ 
+.btn-mic.listening {
+  background: #cc0000;
+  color: #ffffff;
+  box-shadow: 0 0 0 0 rgba(204, 0, 0, 0.5);
+  animation: pulse-ring 1.2s ease-in-out infinite;
+}
+ 
+/* ── Status Text ─────────────────────────────────────────────── */
+.status-text {
+  font-size: var(--font-base);
+  color: var(--text-muted);
+  text-align: center;
+  /* Reserve space to prevent layout shift when text appears */
+  min-height: 32px;
+  padding: 0 16px;
+  line-height: 1.4;
+}
+ 
+/* ── Results Screen Header ───────────────────────────────────── */
+.results-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--card-border);
+  flex-shrink: 0;
+}
+ 
+.btn-back {
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  font-size: var(--font-base);
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  padding: 0 20px;
+  min-height: var(--touch-min);
+  min-width: 90px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--transition), color var(--transition);
+}
+ 
+.btn-back:active {
+  background: var(--accent);
+  color: #000;
+}
+ 
+.query-display {
+  font-size: var(--font-base);
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+ 
+/* ── Results Grid ────────────────────────────────────────────── */
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+  padding: var(--gap);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+}
+ 
+/* ── Video Cards ─────────────────────────────────────────────── */
+/*
+ * Using <button> instead of <div> gives free keyboard/Enter
+ * support and correct semantics.
+ */
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  min-height: var(--touch-min);
+  padding: 0;
+  text-align: left;
+  transition: border-color var(--transition), transform var(--transition);
+  -webkit-user-select: none;
+  user-select: none;
+}
+ 
+.card:active {
+  border-color: var(--accent);
+  transform: scale(0.97);
+}
+ 
+.card-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+  /* Placeholder colour while image loads */
+  background: #111;
+}
+ 
+/*
+ * Card title intentionally uses 14px — an exception to the 24px minimum.
+ * At 24px in a 2-column grid on a 375px phone (~180px per card), every
+ * title would overflow. The thumbnail is the primary tap affordance.
+ */
+.card-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  padding: 8px 10px 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.35;
+}
+ 
+/* ── Player Overlay ──────────────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--overlay-bg);
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+ 
+.btn-close {
+  position: absolute;
+  top: calc(var(--safe-top) + 12px);
+  right: 16px;
+  z-index: 10;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.75);
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: background var(--transition);
+}
+ 
+.btn-close:active {
+  background: var(--accent);
+  color: #000;
+}
+ 
+.player-title {
+  padding: 16px 80px 0 16px;   /* right padding clears the close button */
+  font-size: var(--font-base);
+  color: var(--text-muted);
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+ 
+.iframe-container {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  padding: 8px 0;
+}
+ 
+.iframe-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+ 
+/* ── Error Toast ─────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: calc(var(--safe-bottom) + 16px);
+  left: 16px;
+  right: 16px;
+  z-index: 2000;
+  background: var(--error-bg);
+  border-radius: var(--radius-sm);
+  padding: 18px 64px 18px 20px;
+  font-size: var(--font-base);
+  color: #ffffff;
+  font-weight: 600;
+  line-height: 1.4;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  animation: toast-in 0.25s ease forwards;
+}
+ 
+@keyframes toast-in {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+ 
+.toast-message {
+  display: block;
+}
+ 
+.toast-dismiss {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+ 
+.toast-dismiss:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+ 
+/* ── Responsive Breakpoints ──────────────────────────────────── */
+ 
+/* Tablet / large phone: 3-column grid */
+@media (min-width: 600px) {
+  .results-grid {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+  }
+ 
+  .btn-mic {
+    min-width: 360px;
+  }
+}
+ 
+/* Phone in landscape: shrink mic button so it fits in viewport height */
+@media (orientation: landscape) and (max-height: 500px) {
+  .btn-mic {
+    min-height: 80px;
+    padding: 12px 32px;
+    flex-direction: row;
+    gap: 16px;
+  }
+ 
+  .mic-icon {
+    font-size: 36px;
+  }
+ 
+  .app-title {
+    font-size: var(--font-large);
+  }
+ 
+  .home-inner {
+    gap: 16px;
+  }
+}
