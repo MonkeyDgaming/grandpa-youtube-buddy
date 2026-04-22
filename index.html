@@ -1,1 +1,65 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- iOS home screen full-screen mode -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- Match browser chrome to app background on Android -->
+  <meta name="theme-color" content="#0d0d0d">
+  <title>Music Buddy</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+ 
+  <!-- ===== HOME SCREEN ===== -->
+  <div id="screen-home" class="screen active">
+    <div class="home-inner">
+      <h1 class="app-title">🎵 Music Buddy</h1>
+ 
+      <button id="btn-search" class="btn-mic" aria-label="Search for music by voice">
+        <span class="mic-icon" aria-hidden="true">🎤</span>
+        <span class="btn-label">SEARCH FOR MUSIC</span>
+      </button>
+ 
+      <!-- Status messages (Listening…, Searching…, etc.) announced to screen readers -->
+      <p id="status-text" class="status-text" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+ 
+  <!-- ===== RESULTS SCREEN ===== -->
+  <div id="screen-results" class="screen" hidden>
+    <div class="results-header">
+      <button id="btn-back" class="btn-back" aria-label="Back to search">
+        ← Back
+      </button>
+      <p id="query-display" class="query-display"></p>
+    </div>
+ 
+    <!-- 6 video cards are injected here by script.js -->
+    <div id="results-grid" class="results-grid" role="list"></div>
+  </div>
+ 
+  <!-- ===== VIDEO PLAYER OVERLAY ===== -->
+  <div id="overlay-player" class="overlay" hidden
+       role="dialog" aria-modal="true" aria-label="Now playing">
+ 
+    <button id="btn-close" class="btn-close" aria-label="Close player">✕</button>
+    <p id="player-title" class="player-title"></p>
+ 
+    <!-- iframe is created and destroyed by script.js — never hard-coded here,
+         because setting src="" does not reliably stop audio in all browsers -->
+    <div id="iframe-container" class="iframe-container"></div>
+  </div>
+ 
+  <!-- ===== ERROR TOAST ===== -->
+  <!-- role=alert + aria-live=assertive announces errors immediately to screen readers -->
+  <div id="toast-error" class="toast" hidden role="alert" aria-live="assertive">
+    <span id="toast-message" class="toast-message"></span>
+    <button id="toast-dismiss" class="toast-dismiss" aria-label="Dismiss message">✕</button>
+  </div>
+ 
+  <script src="script.js"></script>
+</body>
+</html>
